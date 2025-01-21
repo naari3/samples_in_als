@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    env,
     fs::File,
     io::{Read as _, Write as _},
 };
@@ -32,16 +33,22 @@ struct AlsParseResult {
 }
 
 fn main() {
-    let als_file = File::open("test.als").unwrap();
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        eprintln!("Usage: {} <als file>", args[0]);
+        std::process::exit(1);
+    }
+
+    let als_file = File::open(&args[1]).unwrap();
     let mut buf_reader = std::io::BufReader::new(als_file);
     let mut decoded = String::new();
 
     let mut d = MultiGzDecoder::new(&mut buf_reader);
     d.read_to_string(&mut decoded).unwrap();
 
-    let output_file = File::create("test.als.xml").unwrap();
-    let mut output = std::io::BufWriter::new(output_file);
-    output.write_all(decoded.as_bytes()).unwrap();
+    // let output_file = File::create("test.als.xml").unwrap();
+    // let mut output = std::io::BufWriter::new(output_file);
+    // output.write_all(decoded.as_bytes()).unwrap();
 
     let als = Document::parse(&decoded).unwrap();
     let als_root = als.root_element();
